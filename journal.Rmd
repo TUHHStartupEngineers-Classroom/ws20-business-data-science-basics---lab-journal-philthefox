@@ -26,7 +26,12 @@ knitr::opts_chunk$set(message=FALSE,warning=FALSE, cache=TRUE)
 ```{r, code = readLines("00_scripts/challenge_2.R"), fig.width = 14, fig.height = 14}
 ```
 
-<!-- # Challenge 3 -->
+# Challenge 3
 
-# ```{r, code = readLines("00_scripts/challenge_3.R"), fig.width = 14, fig.height = 14}
-<!-- ``` -->
+```{r, code = readLines("00_scripts/challenge_3.R"), fig.width = 14, fig.height = 14}
+```
+
+# Challenge 4
+
+```{r, code = readLines("00_scripts/challenge_4.R"), fig.width = 14, fig.height = 14}
+```

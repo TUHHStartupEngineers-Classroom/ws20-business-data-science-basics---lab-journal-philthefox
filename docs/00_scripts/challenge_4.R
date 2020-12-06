@@ -2,6 +2,7 @@
 # 1.0 LIBRARIES ----
 
 library(tidyverse)
+library(lubridate)
 
 # 2.0 DATA IMPORT ----
 
@@ -11,17 +12,53 @@ covid_data_tbl <-
 # 3.0 DATA WRANGLING
 
 covid_data_wrangled_tbl <- covid_data_tbl %>% 
-  select(dateRep, cases, deaths, countriesAndTerritories, countryterritoryCode, `Cumulative_number_for_14_days_of_COVID-19_cases_per_100000`) %>% 
-  rename(cumulative_14_days_per_100000 = `Cumulative_number_for_14_days_of_COVID-19_cases_per_100000`)
-  
+  mutate(date = dmy(dateRep)) %>% 
+  select(date, cases, deaths, countriesAndTerritories, countryterritoryCode, popData2019, `Cumulative_number_for_14_days_of_COVID-19_cases_per_100000`) %>% 
+  rename(cumulative_14_days_per_100000 = `Cumulative_number_for_14_days_of_COVID-19_cases_per_100000`) %>% 
+  arrange(date)
+
+mortality_rate_tbl <- covid_data_wrangled_tbl %>% 
+  group_by(countriesAndTerritories) %>% 
+  summarize(deaths_total = sum(deaths)) %>% 
+  left_join(covid_data_wrangled_tbl) %>% 
+  select(countriesAndTerritories, deaths_total, popData2019) %>% 
+  distinct() %>% 
+  mutate(mortality_rate = deaths_total / popData2019 * 100)
+
+# 4.0 PLOT
+
 covid_data_germany_tbl <- covid_data_wrangled_tbl %>% 
   filter(countriesAndTerritories == "Germany") %>% 
-  mutate(cases_total = cases) %>% 
-  select(dateRep, cases, cases_total, deaths, countriesAndTerritories, countryterritoryCode, cumulative_14_days_per_100000)
+  mutate(cases_total = cumsum(cases)) %>% 
+  select(date, cases, cases_total, deaths, countriesAndTerritories, countryterritoryCode, cumulative_14_days_per_100000)
 
-for (i in covid_data_germany_tbl$cases_total) {
-  if ((i >= 2) && (i <= nrow(covid_data_germany_tbl) + 1)) {
-    covid_data_germany_tbl$cases_total[i] <- 
-      covid_data_germany_tbl$cases_total[i - 1] + covid_data_germany_tbl$cases[i]
-  }
-}
+covid_data_uk_tbl <- covid_data_wrangled_tbl %>% 
+  filter(countriesAndTerritories == "United_Kingdom") %>% 
+  mutate(cases_total = cumsum(cases)) %>% 
+  select(date, cases, cases_total, deaths, countriesAndTerritories, countryterritoryCode, cumulative_14_days_per_100000)
+
+covid_data_france_tbl <- covid_data_wrangled_tbl %>% 
+  filter(countriesAndTerritories == "France") %>% 
+  mutate(cases_total = cumsum(cases)) %>% 
+  select(date, cases, cases_total, deaths, countriesAndTerritories, countryterritoryCode, cumulative_14_days_per_100000)
+
+covid_data_spain_tbl <- covid_data_wrangled_tbl %>% 
+  filter(countriesAndTerritories == "Spain") %>% 
+  mutate(cases_total = cumsum(cases)) %>% 
+  select(date, cases, cases_total, deaths, countriesAndTerritories, countryterritoryCode, cumulative_14_days_per_100000)
+
+covid_data_usa_tbl <- covid_data_wrangled_tbl %>% 
+  filter(countriesAndTerritories == "United_States_of_America") %>% 
+  mutate(cases_total = cumsum(cases)) %>% 
+  select(date, cases, cases_total, deaths, countriesAndTerritories, countryterritoryCode, cumulative_14_days_per_100000)
+
+covid_data_germany_tbl %>% 
+  ggplot(aes(date, cases_total)) +
+  geom_line(size = 1) +
+  geom_line(data = covid_data_uk_tbl, aes(date, cases_total)) +
+  geom_line(data = covid_data_france_tbl, aes(date, cases_total)) +
+  geom_line(data = covid_data_spain_tbl, aes(date, cases_total)) +
+  geom_line(data = covid_data_usa_tbl, aes(date, cases_total))
+
+
+
