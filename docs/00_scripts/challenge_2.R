@@ -218,12 +218,14 @@ get_bike_data <- function(subdirectory_id) {
 bike_data_lst <- map(1:nrow(bike_family_tbl), get_bike_data)
 bike_data_tbl <- bind_rows(bike_data_lst)
 
-bike_data_tbl <- bike_data_tbl %>% 
+bike_data_all_tbl <- bike_data_tbl %>% 
   left_join(bike_family_tbl) %>% 
   # Delete product_family_id, subdirectory and url
-  select(-product_family_id, -subdirectory, -url)
+  select(-product_family_id, -subdirectory, -url) %>% 
+  # Sort by name
+  arrange(name)
 
-head(bike_data_tbl, 10)
+head(bike_data_all_tbl, 10)
 
 
 
